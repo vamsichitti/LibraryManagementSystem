@@ -41,9 +41,12 @@ public class BookServiceImpl implements BookService{
 	}
 
 	@Override
-	public Book getBookById(int id) {
-		// TODO Auto-generated method stub
-		return null;
+	public Book getBookById(long id) throws NoResourceFoundException {
+		Optional<Book> book = bookRepo.findById(id);
+		if(book.isPresent()) {
+			return (Book)book.get();
+		}
+		throw new NoResourceFoundException("Book with ID "+id+" is not present");
 	}
 
 	@Override

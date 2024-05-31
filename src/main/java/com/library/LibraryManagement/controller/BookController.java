@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,4 +37,9 @@ public class BookController {
 		return new ResponseEntity<>(booksList,HttpStatus.OK);
 	}
 	
+	@GetMapping(value="getBookByID/{id}")
+	public ResponseEntity<Book> bookById(@PathVariable("id") int id) throws NoResourceFoundException{
+		Book newBook = bookService.getBookById(id);
+		return new ResponseEntity<Book>(newBook,HttpStatus.OK);
+	}
 }

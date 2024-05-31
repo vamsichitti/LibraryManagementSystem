@@ -10,6 +10,6 @@ public interface BookService {
  public Book createBook(Book book)throws ResourceAlreadyExistsException;
  public Book updateBook(Book book);
  public List<Book> getAllBooks()throws NoResourceFoundException;
- public Book getBookById(int id);
+ public Book getBookById(long id) throws NoResourceFoundException;
  public void deleteBookById(int id);
 }
