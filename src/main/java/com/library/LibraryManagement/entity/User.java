@@ -2,6 +2,7 @@ package com.library.LibraryManagement.entity;
 
 import java.util.Objects;
 
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -26,14 +27,19 @@ public class User {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
     @Column
+	@Nonnull
     private String username;
     @Column
+	@Nonnull
     private String password;
-    @Column                       //(hashed and secured); // Use a secure password hashing mechanism
+    @Column
+	@Nonnull
     private String firstName;
     @Column
+	@Nonnull
     private String lastName;
     @Column
+	@Nonnull
     private String email;
     
 	@Override

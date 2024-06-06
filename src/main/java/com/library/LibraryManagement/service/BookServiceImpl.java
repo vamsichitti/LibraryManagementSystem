@@ -3,11 +3,13 @@ package com.library.LibraryManagement.service;
 import java.util.List;
 import java.util.Optional;
 
+import com.library.LibraryManagement.exceptions.ResourceNotFoundException;
+import com.library.LibraryManagement.validator.CustomValidator;
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.library.LibraryManagement.entity.Book;
-import com.library.LibraryManagement.exceptions.NoResourceFoundException;
 import com.library.LibraryManagement.exceptions.ResourceAlreadyExistsException;
 import com.library.LibraryManagement.repository.BookRepository;
 
@@ -18,43 +20,67 @@ public class BookServiceImpl implements BookService{
 	public BookRepository bookRepo;
     
 	@Override
-	public Book createBook(Book book) throws ResourceAlreadyExistsException {
-		if(isBookExists(book)) {
+	public Book createBook(Book book) throws ResourceAlreadyExistsException, BadRequestException {
+		if(!CustomValidator.isbnIsValid(book.getIsbn())){
+			throw new BadRequestException("ISBN value has to be Integers and length 8 to 10");
+		}
+
+		if(isBookExists(book) && CustomValidator.isbnIsValid(book.getIsbn())) {
 			throw new ResourceAlreadyExistsException("Book with name "+book.getTitle()+" already exists");
 		}
 		return bookRepo.save(book);
 	}
 
 	@Override
-	public Book updateBook(Book book) {
-		// TODO Auto-generated method stub
-		return null;
+	public Book updateBook(Book book) throws ResourceNotFoundException {
+		Optional<Book> bookToBeUpdated = bookRepo.findByIsbn(book.getIsbn());
+		if(bookToBeUpdated.isPresent()){
+			 bookToBeUpdated.get().setTitle(book.getTitle());
+			bookToBeUpdated.get().setAuthor(book.getAuthor());
+			bookToBeUpdated.get().setGenre(book.getGenre());
+			return bookRepo.save(bookToBeUpdated.get());
+		}
+		else{
+			throw new ResourceNotFoundException("book with isbn "+book.getIsbn()+" not present");
+		}
 	}
 
 	@Override
-	public List<Book> getAllBooks() throws NoResourceFoundException {
+	public List<Book> getAllBooks() throws ResourceNotFoundException {
 		List<Book> booksList = bookRepo.findAll();
 		if(booksList.isEmpty()) {
-			throw new NoResourceFoundException("No Books are there");
+			throw new ResourceNotFoundException("No Books are there");
 		}
 		return booksList;
 	}
 
 	@Override
-	public Book getBookById(long id) throws NoResourceFoundException {
+	public Book getBookById(long id) throws ResourceNotFoundException {
 		Optional<Book> book = bookRepo.findById(id);
 		if(book.isPresent()) {
 			return (Book)book.get();
 		}
-		throw new NoResourceFoundException("Book with ID "+id+" is not present");
+		throw new ResourceNotFoundException("Book with ID "+id+" is not present");
 	}
 
 	@Override
-	public void deleteBookById(int id) {
-		// TODO Auto-generated method stub
-		
+	public void deleteBookById(String isbn) throws ResourceNotFoundException {
+		Optional<Book> book = bookRepo.findByIsbn(isbn);
+		if(book.isPresent()){
+			Long id = book.get().getId();
+			bookRepo.deleteById(id);
+		}
+		else {
+			throw new ResourceNotFoundException("Book with ISBN: " + isbn + " not found");
+		}
 	}
-    public Boolean isBookExists(Book book){
+
+	@Override
+	public List<Book> searchBooksByTitle(String title) {
+		return bookRepo.findByTitleContainingIgnoreCase(title);
+	}
+
+	public Boolean isBookExists(Book book){
     	String author = book.getAuthor();
     	String title = book.getTitle();
     	String isbn = book.getIsbn();
@@ -64,4 +90,13 @@ public class BookServiceImpl implements BookService{
     	}
     	return false;
     }
+
+	@Override
+	public List<Book> searchBooksByAuthor(String author) {
+		return bookRepo.findByAuthorContainingIgnoreCase(author);
+	}
+	@Override
+	public List<Book> searchBooksByGenre(String genre) {
+		return bookRepo.findByGenreContainingIgnoreCase(genre);
+	}
 }
