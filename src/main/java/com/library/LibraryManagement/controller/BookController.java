@@ -3,6 +3,7 @@ package com.library.LibraryManagement.controller;
 import java.util.Collections;
 import java.util.List;
 
+import com.library.LibraryManagement.entity.Loan;
 import com.library.LibraryManagement.exceptions.ResourceNotFoundException;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,8 @@ import com.library.LibraryManagement.service.BookService;
 public class BookController {
 
 	@Autowired
-	public BookService bookService;
+	private BookService bookService;
+	private static final int userId = 1;
 	
 	@PostMapping(value="/createbook")
 	public ResponseEntity<Book> registerNewBook(@RequestBody Book book) throws ResourceAlreadyExistsException, BadRequestException {
@@ -79,6 +81,11 @@ public class BookController {
 			searchResults = Collections.emptyList();
 		}
 		return ResponseEntity.ok(searchResults);
+	}
+	@PostMapping("/issueBook/{bookIsbn}")
+	public ResponseEntity<Loan> issueBookToUser(@PathVariable(value = "bookIsbn") String isbn){
+		Loan createdLoan = bookService.issueBook(isbn,userId);
+		return new ResponseEntity<>(createdLoan,HttpStatus.CREATED);
 	}
 
 

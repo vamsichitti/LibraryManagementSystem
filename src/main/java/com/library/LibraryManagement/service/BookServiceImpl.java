@@ -1,15 +1,18 @@
 package com.library.LibraryManagement.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import com.library.LibraryManagement.entity.*;
 import com.library.LibraryManagement.exceptions.ResourceNotFoundException;
+import com.library.LibraryManagement.repository.LoanRepository;
+import com.library.LibraryManagement.repository.UserRepository;
 import com.library.LibraryManagement.validator.CustomValidator;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.library.LibraryManagement.entity.Book;
 import com.library.LibraryManagement.exceptions.ResourceAlreadyExistsException;
 import com.library.LibraryManagement.repository.BookRepository;
 
@@ -17,7 +20,12 @@ import com.library.LibraryManagement.repository.BookRepository;
 public class BookServiceImpl implements BookService{
 	
     @Autowired
-	public BookRepository bookRepo;
+	private BookRepository bookRepo;
+	@Autowired
+	private LoanRepository loanRepo;
+	@Autowired
+	private UserRepository userRepo;
+
     
 	@Override
 	public Book createBook(Book book) throws ResourceAlreadyExistsException, BadRequestException {
@@ -58,7 +66,7 @@ public class BookServiceImpl implements BookService{
 	public Book getBookById(long id) throws ResourceNotFoundException {
 		Optional<Book> book = bookRepo.findById(id);
 		if(book.isPresent()) {
-			return (Book)book.get();
+			return book.get();
 		}
 		throw new ResourceNotFoundException("Book with ID "+id+" is not present");
 	}
@@ -81,8 +89,6 @@ public class BookServiceImpl implements BookService{
 	}
 
 	public Boolean isBookExists(Book book){
-    	String author = book.getAuthor();
-    	String title = book.getTitle();
     	String isbn = book.getIsbn();
     	Optional<Book> createdBook = bookRepo.findByIsbn(isbn);
     	if(createdBook.isPresent()) {
@@ -99,4 +105,18 @@ public class BookServiceImpl implements BookService{
 	public List<Book> searchBooksByGenre(String genre) {
 		return bookRepo.findByGenreContainingIgnoreCase(genre);
 	}
+    @Override
+	public Loan issueBook(String isbn, long userId){
+		Book book = bookRepo.findByIsbn(isbn).get();
+		User user = userRepo.findById(userId).get();
+		book.setIsIssued(BookStatus.ISSUED);
+		Loan loan = new Loan();
+		loan.setBook(book);
+		loan.setUser(user);
+		loan.setLoanDate(LocalDate.now());
+		loan.setLoanStatus(LoanStatus.OPEN);
+		return loanRepo.save(loan);
+	}
+
+
 }

@@ -1,19 +1,17 @@
 package com.library.LibraryManagement.entity;
 
-import java.util.Objects;
+import java.util.*;
 
 import jakarta.annotation.Nonnull;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 @Setter
 @Getter
@@ -22,7 +20,7 @@ import lombok.Setter;
 @Builder
 @Entity
 @Table(name = "\"user\"")
-public class User {
+public class User implements UserDetails {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -41,6 +39,8 @@ public class User {
     @Column
 	@Nonnull
     private String email;
+	@Column
+	private UserRole role ;
     
 	@Override
 	public int hashCode() {
@@ -64,6 +64,36 @@ public class User {
 		return "User [id=" + id + ", username=" + username + ", password=" + password + ", firstName=" + firstName
 				+ ", lastName=" + lastName + ", email=" + email + "]";
 	}
-    
-    
+
+
+	@Override
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+
+		return List.of(new SimpleGrantedAuthority(role.name()));
+	}
+
+	public void setAuthorities(Collection<? extends GrantedAuthority> authorities) {
+
+//		this.authorities = authorities;
+	}
+
+	@Override
+	public boolean isAccountNonExpired() {
+		return true;
+	}
+
+	@Override
+	public boolean isAccountNonLocked() {
+		return true;
+	}
+
+	@Override
+	public boolean isCredentialsNonExpired() {
+		return true;
+	}
+
+	@Override
+	public boolean isEnabled() {
+		return true;
+	}
 }

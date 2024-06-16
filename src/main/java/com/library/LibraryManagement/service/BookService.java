@@ -3,6 +3,7 @@ package com.library.LibraryManagement.service;
 import java.util.List;
 
 import com.library.LibraryManagement.entity.Book;
+import com.library.LibraryManagement.entity.Loan;
 import com.library.LibraryManagement.exceptions.ResourceAlreadyExistsException;
 import com.library.LibraryManagement.exceptions.ResourceNotFoundException;
 import org.apache.coyote.BadRequestException;
@@ -18,4 +19,5 @@ public interface BookService {
  List<Book> searchBooksByAuthor(String author);
 
  List<Book> searchBooksByGenre(String genre);
+ Loan issueBook(String isbn, long userId);
 }

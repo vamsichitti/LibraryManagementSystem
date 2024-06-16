@@ -30,6 +30,8 @@ public class Book {
         @Column
 		@NotBlank(message = "genre cannot be null")
 	    private String genre;
+
+		private BookStatus isIssued;
 		
         
         
