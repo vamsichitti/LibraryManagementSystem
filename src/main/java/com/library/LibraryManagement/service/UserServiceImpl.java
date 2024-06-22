@@ -42,9 +42,12 @@ public class UserServiceImpl implements UserService{
 	}
 
 	@Override
-	public List<User> getAllUsers() {
-		// TODO Auto-generated method stub
-		return null;
+	public List<User> getAllUsers() throws Exception {
+		List<User> userList = userRepository.findAll();
+		if(userList.isEmpty()){
+			throw new Exception("No users Found ");
+		}
+		return userList;
 	}
 
 	@Override
